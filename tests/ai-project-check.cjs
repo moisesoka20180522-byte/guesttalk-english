@@ -12,6 +12,7 @@ function assert(condition, message) {
 }
 
 assert(fs.existsSync(path.join(root, "api", "chat.js")), "api/chat.js must exist");
+assert(fs.existsSync(path.join(root, "api", "telegram.js")), "api/telegram.js must exist");
 assert(fs.existsSync(path.join(root, "index.html")), "index.html must exist at project root");
 assert(fs.existsSync(path.join(root, "app.js")), "app.js must exist at project root");
 assert(fs.existsSync(path.join(root, "manifest.webmanifest")), "manifest.webmanifest must exist at project root");
@@ -62,6 +63,14 @@ assert(api.includes("partner_reply"), "API prompt must request partner_reply");
 assert(api.includes("better_user_english"), "API prompt must request better_user_english");
 assert(api.includes("japanese_feedback"), "API prompt must request Japanese feedback");
 assert(api.includes("module.exports"), "API must use Vercel-compatible CommonJS export");
+
+const telegramApi = read("api/telegram.js");
+assert(telegramApi.includes("TELEGRAM_BOT_TOKEN"), "Telegram API must read TELEGRAM_BOT_TOKEN");
+assert(telegramApi.includes("TELEGRAM_CHAT_ID"), "Telegram API must restrict replies by chat id");
+assert(telegramApi.includes("sendMessage"), "Telegram API must call sendMessage");
+assert(telegramApi.includes("링크"), "Telegram API must support link command");
+assert(telegramApi.includes("상태"), "Telegram API must support status command");
+assert(telegramApi.includes("도움말"), "Telegram API must support help command");
 
 JSON.parse(read("manifest.webmanifest"));
 JSON.parse(read("vercel.json"));
