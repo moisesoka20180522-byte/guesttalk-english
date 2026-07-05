@@ -24,7 +24,7 @@ assert(!html.includes("inputLanguage"), "manual input language selector should b
 assert(!html.includes("conversationMode"), "manual conversation mode selector should be removed");
 assert(html.includes("levelSelect"), "level selector must remain");
 assert(html.includes("topicSelect"), "topic selector must remain");
-assert(html.includes("v=10"), "cache-busting version must be updated");
+assert(html.includes("v=11"), "cache-busting version must be updated");
 assert(html.includes('lang="ja"'), "HTML language must be Japanese");
 
 const app = read("app.js");
@@ -54,6 +54,9 @@ assert(api.includes("wrong locale"), "API prompt must handle wrong speech recogn
 assert(api.includes("i know how to say you"), "API fallback must handle common Korean greeting misrecognition");
 assert(api.includes("expression_question"), "API must detect expression questions");
 assert(api.includes("expression_options"), "API must return expression options");
+assert(api.includes("conversationReplyFor"), "API fallback must respond directly before asking a new question");
+assert(api.includes("train station"), "API fallback must handle train/station direction phrases");
+assert(api.includes("Do not ignore the learner"), "API prompt must prevent unrelated template questions");
 assert(api.includes("https://api.openai.com/v1/responses"), "API must optionally use OpenAI Responses API");
 assert(api.includes("partner_reply"), "API prompt must request partner_reply");
 assert(api.includes("better_user_english"), "API prompt must request better_user_english");

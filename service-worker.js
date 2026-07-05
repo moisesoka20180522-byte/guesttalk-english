@@ -1,10 +1,10 @@
-const CACHE_NAME = "everyday-english-speak-v10";
+const CACHE_NAME = "everyday-english-speak-v11";
 const APP_ASSETS = [
   "./",
   "./index.html",
-  "./styles.css?v=10",
-  "./app.js?v=10",
-  "./manifest.webmanifest?v=10",
+  "./styles.css?v=11",
+  "./app.js?v=11",
+  "./manifest.webmanifest?v=11",
   "./icons/app-icon.svg",
   "./icons/app-icon-maskable.svg"
 ];

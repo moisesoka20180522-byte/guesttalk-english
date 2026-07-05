@@ -72,6 +72,7 @@ function simpleEnglishFromAnyLanguage(text, topic) {
   const source = String(text || "");
   const lower = source.toLowerCase();
   if (!source) return "I want to practice English.";
+  if (/전철|기차|지하철|역|電車|駅|train|station|subway/.test(source)) return "Hello. Where is the train station?";
   if (/안녕|こんにちは|おはよう|こんばんは|annyeong|anyeong/.test(source)) return "Hello. Nice to talk with you.";
   if (/i know how to say you|i know how to say yo|i don't know how to say you|i know say you|i know how say you/.test(lower)) return "Hello. Nice to talk with you.";
   if (/arigato|ありがとう|고마워|감사/.test(source)) return "Thank you.";
@@ -87,6 +88,27 @@ function simpleEnglishFromAnyLanguage(text, topic) {
   if (topic === "food") return "I want to talk about food.";
   if (topic === "work") return "I want to talk about work.";
   return "I want to talk about my day.";
+}
+
+function conversationReplyFor(userText, betterEnglish) {
+  const source = String(userText || "");
+  const lowerBetter = String(betterEnglish || "").toLowerCase();
+  if (/nice to meet you|만나서|はじめまして/.test(source.toLowerCase())) {
+    return "Nice to meet you too. How are you today?";
+  }
+  if (/전철|기차|지하철|역|電車|駅|train|station|subway/.test(source) || /train station|subway station/.test(lowerBetter)) {
+    return `You can say: "${betterEnglish}" Try it once more.`;
+  }
+  if (/hello|hi|안녕|こんにちは|こんばんは/.test(source.toLowerCase())) {
+    return "Hello. Nice to talk with you. How are you today?";
+  }
+  if (/cafe|coffee|카페|커피|カフェ|コーヒー/.test(source.toLowerCase())) {
+    return "That sounds nice. What did you drink there?";
+  }
+  if (/work|일|仕事|회사|会社/.test(source.toLowerCase())) {
+    return "I see. Was work busy today?";
+  }
+  return `I understand. You can say: "${betterEnglish}"`;
 }
 
 function expressionFallback(userText) {
@@ -132,6 +154,7 @@ function localFallback({ topic, level, messages }) {
   }
 
   const better = simpleEnglishFromAnyLanguage(userText, topic);
+  const partnerReply = conversationReplyFor(userText, better);
   const levelTip = level === "advanced"
     ? "理由や具体例を足すと、より自然な上級英語になります。"
     : level === "intermediate"
@@ -140,12 +163,12 @@ function localFallback({ topic, level, messages }) {
 
   return {
     intent: "conversation_practice",
-    partner_reply: `Great. ${nextQuestion}`,
+    partner_reply: partnerReply,
     better_user_english: better,
     expression_options: [],
     japanese_feedback: `無料練習モードです。${levelTip}`,
     pronunciation_tip: "英語は一語ずつ止めすぎず、短いかたまりで話すと自然です。",
-    next_question: nextQuestion,
+    next_question: partnerReply.includes("?") ? partnerReply : nextQuestion,
     free_mode: true
   };
 }
@@ -172,7 +195,9 @@ If intent is "conversation_practice":
 1. Correct the learner's expression into natural English.
 2. Explain briefly in Japanese.
 3. Give one pronunciation tip.
-4. Continue with one easy spoken English question.
+4. First respond directly to what the learner said. Do not ignore the learner and jump to an unrelated template question.
+5. If the learner asks for directions or mixes Korean/Japanese with English, translate the whole meaning into natural English and give feedback.
+6. Continue with one related easy spoken English question only after responding.
 
 Recognizer locale: ${recognitionLanguage || "auto"}
 Topic: ${topics[topic] || topics.daily}
