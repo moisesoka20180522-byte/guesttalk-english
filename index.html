@@ -7,8 +7,8 @@
     <meta name="mobile-web-app-capable" content="yes">
     <title>Everyday English AI</title>
     <link rel="icon" href="icons/app-icon.svg" type="image/svg+xml">
-    <link rel="manifest" href="manifest.webmanifest">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.webmanifest?v=2">
+    <link rel="stylesheet" href="styles.css?v=2">
   </head>
   <body>
     <main class="app-shell">
@@ -68,10 +68,10 @@
         <p id="answerStarter" class="starter-line"></p>
       </section>
     </main>
-    <script src="app.js"></script>
+    <script src="app.js?v=2"></script>
     <script>
       if ("serviceWorker" in navigator) {
-        window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js"));
+        window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js?v=2"));
       }
     </script>
   </body>
