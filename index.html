@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#1f7a4d">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="GuestTalk">
+    <title>GuestTalk English</title>
+    <link rel="icon" href="icons/app-icon.svg" type="image/svg+xml">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">GuestTalk English</p>
+          <h1>민박 손님과 바로 말하는 영어회화</h1>
+        </div>
+        <section class="today-card" aria-label="오늘 연습 기록">
+          <span class="today-label">오늘 연습</span>
+          <strong id="practiceCount">0</strong>
+          <span>문장</span>
+        </section>
+      </header>
+
+      <section class="install-card" id="installCard">
+        <div>
+          <p class="eyebrow">Android App</p>
+          <h2>홈 화면에 추가해서 앱처럼 실행하세요</h2>
+        </div>
+        <button id="installButton" class="primary-button" type="button">설치</button>
+      </section>
+
+      <section class="mission-strip" aria-label="오늘의 연습 미션">
+        <article>
+          <span>1</span>
+          <p>체크인 문장 1개 말하기</p>
+        </article>
+        <article>
+          <span>2</span>
+          <p>손님 질문에 영어로 답하기</p>
+        </article>
+        <article>
+          <span>3</span>
+          <p>문제 대응 표현 반복하기</p>
+        </article>
+      </section>
+
+      <section class="workspace" aria-label="영어 회화 연습">
+        <aside class="sidebar">
+          <h2>상황 선택</h2>
+          <div id="categoryTabs" class="category-tabs" role="tablist"></div>
+        </aside>
+
+        <section class="content-panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Phrase Bank</p>
+              <h2 id="categoryTitle">체크인</h2>
+            </div>
+            <button id="shufflePhrase" class="icon-button" type="button" title="랜덤 문장" aria-label="랜덤 문장">↻</button>
+          </div>
+          <div id="phraseList" class="phrase-grid"></div>
+        </section>
+
+        <section class="practice-panel">
+          <div class="drill-card">
+            <p class="eyebrow">Speaking Drill</p>
+            <h2>따라 말하기</h2>
+            <p id="drillKorean" class="korean-line"></p>
+            <p id="drillEnglish" class="english-line"></p>
+            <p id="drillPronunciation" class="pronunciation-line"></p>
+            <div class="button-row">
+              <button id="nextDrill" class="secondary-button" type="button">다음</button>
+              <button id="markPracticed" class="primary-button" type="button">연습 완료</button>
+            </div>
+          </div>
+
+          <div class="prompt-card">
+            <div class="section-heading compact">
+              <div>
+                <p class="eyebrow">Free Talking</p>
+                <h2>손님과 스몰토크</h2>
+              </div>
+              <button id="newPrompt" class="icon-button" type="button" title="새 질문" aria-label="새 질문">+</button>
+            </div>
+            <p id="talkPrompt" class="prompt-line"></p>
+            <p id="answerStarter" class="starter-line"></p>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./service-worker.js");
+        });
+      }
+    </script>
+  </body>
+</html>
