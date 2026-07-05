@@ -1,44 +1,38 @@
 const starters = [
-  { question: "How was your day?", starter: "Example: It was pretty good. I was busy, but I had a nice lunch." },
-  { question: "What do you usually do in the morning?", starter: "Example: I usually drink coffee and check my messages." },
-  { question: "What kind of food do you like?", starter: "Example: I like spicy food, but I also enjoy simple home cooking." },
-  { question: "What do you like to do on weekends?", starter: "Example: I like walking around town and trying new cafes." },
-  { question: "Tell me about a place you want to visit.", starter: "Example: I want to visit Canada because I like nature." }
+  { question: "오늘 뭐 했어? / 今日何をした？", starter: "Say it naturally. AI will answer in English." },
+  { question: "요즘 좋아하는 음식은? / 最近好きな食べ物は？", starter: "You can answer in Korean, Japanese, or English." },
+  { question: "주말에 뭐 하고 싶어? / 週末に何をしたい？", starter: "Speak freely. Short answers are fine." },
+  { question: "어디 여행 가고 싶어? / どこへ旅行したい？", starter: "AI will correct it into natural English." },
+  { question: "오늘 기분이 어때? / 今日の気分は？", starter: "After AI replies, answer the next question." }
 ];
 
-const ui = {
-  voiceMode: "マイクで会話",
-  textMode: "テキスト会話",
+const levelLabels = {
   beginner: "初級",
   intermediate: "中級",
   advanced: "上級"
-};
-
-const speechLangs = {
-  auto: "en-US",
-  ko: "ko-KR",
-  ja: "ja-JP",
-  en: "en-US"
 };
 
 const state = {
   messages: [],
   practiceCount: Number(localStorage.getItem("guesttalk-ai-count") || 0),
   isSending: false,
+  isConversationActive: false,
+  isListening: false,
   recognition: null,
-  isListening: false
+  languageIndex: 0
 };
+
+const recognitionLangs = ["ko-KR", "ja-JP", "en-US"];
 
 const els = {
   practiceCount: document.querySelector("#practiceCount"),
-  conversationMode: document.querySelector("#conversationMode"),
   levelSelect: document.querySelector("#levelSelect"),
   topicSelect: document.querySelector("#topicSelect"),
-  inputLanguage: document.querySelector("#inputLanguage"),
   aiMessages: document.querySelector("#aiMessages"),
   aiForm: document.querySelector("#aiForm"),
   aiInput: document.querySelector("#aiInput"),
   voiceButton: document.querySelector("#voiceButton"),
+  voiceStatus: document.querySelector("#voiceStatus"),
   resetChat: document.querySelector("#resetChat"),
   newPrompt: document.querySelector("#newPrompt"),
   talkPrompt: document.querySelector("#talkPrompt"),
@@ -66,26 +60,24 @@ function addMessage(role, html) {
   els.aiMessages.scrollTop = els.aiMessages.scrollHeight;
 }
 
-function currentModeLabel() {
-  return els.conversationMode.value === "voice" ? ui.voiceMode : ui.textMode;
-}
-
-function currentLevelLabel() {
-  return ui[els.levelSelect.value] || ui.beginner;
+function updateStatus(text) {
+  els.voiceStatus.textContent = text;
 }
 
 function showWelcome() {
   addMessage("assistant", `
-    <strong>AI Speak Partner</strong>
-    <p>Hi! Say anything in Korean, Japanese, or English. I will turn it into natural English and keep the conversation going.</p>
-    <small>${currentLevelLabel()}・${currentModeLabel()}。無料モードでも基本練習できます。</small>
+    <strong>AI Voice Partner</strong>
+    <p>Press the green button and speak. I will correct your message into English and answer by voice.</p>
+    <small>${levelLabels[els.levelSelect.value]}。無料モードでは簡易練習、API接続時はAI会話になります。</small>
   `);
 }
 
 function resetConversation() {
+  stopConversation();
   state.messages = [];
   els.aiMessages.innerHTML = "";
   showWelcome();
+  updateStatus("韓国語・日本語・英語、どれで話してもOKです。");
 }
 
 function showRandomPrompt() {
@@ -97,52 +89,35 @@ function showRandomPrompt() {
 function renderAiResponse(data) {
   const partnerReply = data.partner_reply || data.next_question || "";
   addMessage("assistant", `
-    <strong>AI Speak Partner</strong>
-    <p>${escapeHtml(partnerReply)}</p>
+    <strong>AI Voice Partner</strong>
+    <p>${escapeHtml(data.better_user_english || "Good. Keep going.")}</p>
     <div class="feedback-box">
-      <b>Natural English</b>
-      <p>${escapeHtml(data.better_user_english || "Good. Keep going.")}</p>
+      <b>AI voice reply</b>
+      <p>${escapeHtml(partnerReply)}</p>
       <b>日本語フィードバック</b>
       <p>${escapeHtml(data.japanese_feedback || "")}</p>
-      <b>発音のコツ</b>
+      <b>Pronunciation</b>
       <p>${escapeHtml(data.pronunciation_tip || "")}</p>
-      <b>Next question</b>
-      <p>${escapeHtml(data.next_question || "")}</p>
-      ${data.free_mode ? "<small>Free practice mode: API料金なしで使える簡易AI練習です。</small>" : ""}
+      ${data.free_mode ? "<small>Free practice mode: API料金なしの簡易会話です。</small>" : ""}
     </div>
   `);
-
-  if (els.conversationMode.value === "voice") {
-    speakText(partnerReply);
-  }
 }
 
-async function sendAiMessage(event) {
-  event.preventDefault();
-  if (state.isSending) return;
+async function sendTextToAi(text, source = "voice") {
+  if (state.isSending || !text.trim()) return;
 
-  const text = els.aiInput.value.trim();
-  if (!text) {
-    addMessage("assistant", `
-      <strong>入力してください</strong>
-      <p>マイクで話すか、韓国語・日本語・英語で一文を書いてください。</p>
-    `);
-    els.aiInput.focus();
-    return;
-  }
-
+  const userText = text.trim();
   els.aiInput.value = "";
-  state.messages.push({ role: "user", content: text });
-  addMessage("user", `<strong>You</strong><p>${escapeHtml(text)}</p>`);
+  state.messages.push({ role: "user", content: userText });
+  addMessage("user", `<strong>You said</strong><p>${escapeHtml(userText)}</p>`);
 
   state.isSending = true;
-  const submitButton = els.aiForm.querySelector("button[type='submit']");
-  submitButton.disabled = true;
-  submitButton.textContent = "AI is replying...";
+  updateStatus("AI is thinking...");
+  els.aiForm.querySelector("button[type='submit']").disabled = true;
 
   const loading = document.createElement("article");
   loading.className = "message assistant loading";
-  loading.textContent = "AI is thinking...";
+  loading.textContent = "AI is preparing a voice reply...";
   els.aiMessages.append(loading);
 
   try {
@@ -150,10 +125,10 @@ async function sendAiMessage(event) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        mode: els.conversationMode.value,
+        mode: "voice",
         level: els.levelSelect.value,
         topic: els.topicSelect.value,
-        inputLanguage: els.inputLanguage.value,
+        inputLanguage: "auto",
         messages: state.messages
       })
     });
@@ -163,35 +138,62 @@ async function sendAiMessage(event) {
 
     if (!response.ok) {
       addMessage("assistant", `<strong>Server message</strong><p>${escapeHtml(data.error || "Please try again.")}</p>`);
+      updateStatus("Server error. Try again.");
       return;
     }
 
-    state.messages.push({ role: "assistant", content: data.partner_reply || data.next_question || "" });
+    const reply = data.partner_reply || data.next_question || "";
+    state.messages.push({ role: "assistant", content: reply });
     state.practiceCount += 1;
     localStorage.setItem("guesttalk-ai-count", String(state.practiceCount));
     renderCount();
     renderAiResponse(data);
+    await speakText(reply);
+
+    if (state.isConversationActive && source === "voice") {
+      setTimeout(startListening, 600);
+    }
   } catch (error) {
     loading.remove();
     addMessage("assistant", `<strong>Connection error</strong><p>${escapeHtml(error.message)}</p>`);
+    updateStatus("Connection error. Try again.");
   } finally {
     state.isSending = false;
-    submitButton.disabled = false;
-    submitButton.textContent = "AIに送る";
+    els.aiForm.querySelector("button[type='submit']").disabled = false;
   }
 }
 
-function updateVoiceButton(status) {
-  const icon = state.isListening ? "●" : "🎙";
-  const label = status || (state.isListening ? "聞き取り中..." : "押して話す");
-  els.voiceButton.innerHTML = `<span class="mic-icon">${icon}</span><strong>${label}</strong><small>話した後、AIに送るを押してください</small>`;
+function submitText(event) {
+  event.preventDefault();
+  const text = els.aiInput.value.trim();
+  if (!text) {
+    updateStatus("マイクで話すか、テキストを入力してください。");
+    return;
+  }
+  sendTextToAi(text, "text");
+}
+
+function updateVoiceButton() {
+  if (state.isConversationActive) {
+    els.voiceButton.innerHTML = `<span class="mic-icon">■</span><strong>会話を止める</strong><small>AIの返事が終わると自動で聞きます</small>`;
+  } else {
+    els.voiceButton.innerHTML = `<span class="mic-icon">🎙</span><strong>会話を始める</strong><small>押したら自由に話してください</small>`;
+  }
+}
+
+function orderedRecognitionLangs() {
+  const browserLang = (navigator.language || "").toLowerCase();
+  if (browserLang.startsWith("ja")) return ["ja-JP", "ko-KR", "en-US"];
+  if (browserLang.startsWith("en")) return ["en-US", "ko-KR", "ja-JP"];
+  return recognitionLangs;
 }
 
 function setupSpeechRecognition() {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRecognition) {
-    els.voiceButton.innerHTML = `<span class="mic-icon">×</span><strong>音声入力は未対応</strong><small>Chromeで開くか、テキストで練習してください</small>`;
     els.voiceButton.disabled = true;
+    els.voiceButton.innerHTML = `<span class="mic-icon">×</span><strong>音声入力は未対応</strong><small>Chromeで開くか、テキストで練習してください</small>`;
+    updateStatus("このブラウザは音声入力に対応していません。");
     return;
   }
 
@@ -201,57 +203,94 @@ function setupSpeechRecognition() {
 
   state.recognition.addEventListener("start", () => {
     state.isListening = true;
-    updateVoiceButton("聞き取り中...");
+    updateStatus("Listening... Speak now.");
   });
 
   state.recognition.addEventListener("result", (event) => {
-    els.aiInput.value = Array.from(event.results).map((result) => result[0].transcript).join(" ");
-    els.aiInput.focus();
+    const result = event.results[event.results.length - 1][0];
+    const transcript = result.transcript.trim();
+    state.isListening = false;
+    if (!transcript) {
+      updateStatus("I could not hear clearly. Please speak again.");
+      if (state.isConversationActive) setTimeout(startListening, 500);
+      return;
+    }
+    updateStatus(`Heard: ${transcript}`);
+    sendTextToAi(transcript, "voice");
   });
 
   state.recognition.addEventListener("end", () => {
     state.isListening = false;
-    updateVoiceButton();
   });
 
   state.recognition.addEventListener("error", () => {
     state.isListening = false;
-    updateVoiceButton("もう一度話す");
+    updateStatus("音声を聞き取れませんでした。もう一度話してください。");
+    if (state.isConversationActive && !state.isSending) setTimeout(startListening, 700);
   });
 }
 
+function startListening() {
+  if (!state.recognition || state.isListening || state.isSending || !state.isConversationActive) return;
+  const langs = orderedRecognitionLangs();
+  state.recognition.lang = langs[state.languageIndex % langs.length];
+  state.languageIndex += 1;
+  try {
+    state.recognition.start();
+  } catch {
+    setTimeout(startListening, 700);
+  }
+}
+
+function startConversation() {
+  state.isConversationActive = true;
+  state.languageIndex = 0;
+  updateVoiceButton();
+  startListening();
+}
+
+function stopConversation() {
+  state.isConversationActive = false;
+  if (state.recognition && state.isListening) state.recognition.stop();
+  window.speechSynthesis?.cancel();
+  updateVoiceButton();
+}
+
+function toggleConversation() {
+  if (state.isConversationActive) {
+    stopConversation();
+    updateStatus("会話を停止しました。");
+  } else {
+    startConversation();
+  }
+}
+
 function speakText(text) {
-  if (!text || !("speechSynthesis" in window)) return;
-  window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "en-US";
-  utterance.rate = els.levelSelect.value === "beginner" ? 0.82 : els.levelSelect.value === "intermediate" ? 0.92 : 1;
-  window.speechSynthesis.speak(utterance);
+  return new Promise((resolve) => {
+    if (!text || !("speechSynthesis" in window)) return resolve();
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "en-US";
+    utterance.rate = els.levelSelect.value === "beginner" ? 0.82 : els.levelSelect.value === "intermediate" ? 0.92 : 1;
+    utterance.onstart = () => updateStatus("AI is speaking...");
+    utterance.onend = () => {
+      updateStatus("Your turn. Speak naturally.");
+      resolve();
+    };
+    utterance.onerror = () => resolve();
+    window.speechSynthesis.speak(utterance);
+  });
 }
 
-function updateMode() {
-  document.body.dataset.mode = els.conversationMode.value;
-}
-
-function startVoiceInput() {
-  if (!state.recognition || state.isListening) return;
-  state.recognition.lang = speechLangs[els.inputLanguage.value] || "en-US";
-  state.recognition.start();
-}
-
-els.aiForm.addEventListener("submit", sendAiMessage);
+els.aiForm.addEventListener("submit", submitText);
 els.newPrompt.addEventListener("click", showRandomPrompt);
 els.resetChat.addEventListener("click", resetConversation);
-els.conversationMode.addEventListener("change", updateMode);
 els.levelSelect.addEventListener("change", resetConversation);
 els.topicSelect.addEventListener("change", resetConversation);
-els.inputLanguage.addEventListener("change", () => {
-  if (state.recognition) state.recognition.lang = speechLangs[els.inputLanguage.value] || "en-US";
-});
-els.voiceButton.addEventListener("click", startVoiceInput);
+els.voiceButton.addEventListener("click", toggleConversation);
 
 renderCount();
 setupSpeechRecognition();
-updateMode();
 showWelcome();
 showRandomPrompt();
+updateVoiceButton();

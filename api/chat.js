@@ -10,20 +10,20 @@ const topics = {
 };
 
 const levels = {
-  beginner: "Beginner: use short, simple sentences. Ask one easy question at a time.",
-  intermediate: "Intermediate: use natural but not difficult English. Correct clearly.",
-  advanced: "Advanced: use realistic English. Give stricter corrections and encourage longer answers."
+  beginner: "Beginner: use short, simple English. Ask one easy question.",
+  intermediate: "Intermediate: use natural English and concise correction.",
+  advanced: "Advanced: use realistic English and stricter correction."
 };
 
 const nextQuestions = {
-  daily: ["What did you do today?", "What do you usually do after dinner?", "How do you relax on busy days?"],
-  self_intro: ["What do you like to do in your free time?", "How would you describe your personality?", "Where are you from?"],
-  travel: ["Where do you want to travel next?", "What do you usually pack first?", "Do you prefer cities or nature?"],
-  food: ["What did you eat today?", "What cafe or restaurant do you like?", "Can you cook any simple dishes?"],
+  daily: ["How was your day?", "What did you do today?", "What do you usually do after dinner?"],
+  self_intro: ["What do you like to do in your free time?", "Where are you from?", "What kind of person are you?"],
+  travel: ["Where do you want to travel next?", "Do you prefer cities or nature?", "What country do you want to visit?"],
+  food: ["What did you eat today?", "What food do you like?", "Do you like cooking?"],
   shopping: ["What did you buy recently?", "Do you like shopping online?", "What color do you usually choose?"],
-  work: ["What kind of work do you do?", "Was work busy today?", "What is one thing you need to do tomorrow?"],
-  friends: ["What do you usually do with your friends?", "Did you watch anything interesting recently?", "What are your weekend plans?"],
-  free: ["Tell me more about that.", "Why do you feel that way?", "What happened next?"]
+  work: ["Was work busy today?", "What kind of work do you do?", "What is one thing you need to do tomorrow?"],
+  friends: ["What do you usually do with your friends?", "What are your weekend plans?", "Did you watch anything interesting recently?"],
+  free: ["Tell me more about that.", "Why do you think so?", "What happened next?"]
 };
 
 function jsonResponse(res, status, body) {
@@ -52,7 +52,7 @@ function lastUserText(messages) {
 
 function polishEnglish(text) {
   let value = String(text || "").trim();
-  if (!value) return "I want to practice English today.";
+  if (!value) return "I want to practice English.";
   value = value.replace(/\bi went to cafe\b/gi, "I went to a cafe");
   value = value.replace(/\bi am go\b/gi, "I am going");
   value = value.replace(/\bi drinked\b/gi, "I drank");
@@ -64,14 +64,15 @@ function polishEnglish(text) {
 }
 
 function simpleEnglishFromAnyLanguage(text, topic) {
-  const source = String(text || "").toLowerCase();
-  if (!source) return "I want to practice English today.";
-  if (/[a-z]/i.test(source)) return polishEnglish(text);
-  if (/카페|커피|カフェ|コーヒー/.test(text)) return "I went to a cafe today.";
-  if (/친구|友達/.test(text)) return "I met my friend today.";
-  if (/일|仕事|회사|会社/.test(text)) return "Work was busy today.";
-  if (/여행|旅行/.test(text)) return "I want to travel soon.";
-  if (/배고|お腹|밥|ご飯|食/.test(text)) return "I want to talk about food.";
+  const source = String(text || "");
+  if (!source) return "I want to practice English.";
+  if (/[a-z]/i.test(source)) return polishEnglish(source);
+  if (/안녕|こんにちは|おはよう|こんばんは/.test(source)) return "Hello. Nice to talk with you.";
+  if (/카페|커피|カフェ|コーヒー/.test(source)) return "I went to a cafe today.";
+  if (/친구|友達/.test(source)) return "I met my friend today.";
+  if (/일|仕事|회사|会社/.test(source)) return "Work was busy today.";
+  if (/여행|旅行/.test(source)) return "I want to travel soon.";
+  if (/밥|ご飯|食|배고/.test(source)) return "I want to talk about food.";
   if (topic === "self_intro") return "Let me introduce myself.";
   if (topic === "travel") return "I want to talk about travel.";
   if (topic === "food") return "I want to talk about food.";
@@ -79,68 +80,46 @@ function simpleEnglishFromAnyLanguage(text, topic) {
   return "I want to talk about my day.";
 }
 
-function localFallback({ topic, level, mode, messages }) {
-  const userText = lastUserText(messages);
-  const better = simpleEnglishFromAnyLanguage(userText, topic);
+function localFallback({ topic, level, messages }) {
+  const better = simpleEnglishFromAnyLanguage(lastUserText(messages), topic);
   const questions = nextQuestions[topic] || nextQuestions.daily;
   const nextQuestion = questions[messages.length % questions.length];
   const levelTip = level === "advanced"
-    ? "もう少し詳しく、理由や例を足すと上級らしい英語になります。"
+    ? "理由や具体例を足すと、より自然な上級英語になります。"
     : level === "intermediate"
-      ? "文は自然です。次は理由を一文足してみましょう。"
-      : "短い文で大丈夫です。主語 + 動詞をはっきり言いましょう。";
-  const voiceTip = mode === "voice"
-    ? "英語は一語ずつ止めすぎず、短いかたまりで読みます。"
-    : "声に出す時は、最後の音まで軽く発音してみましょう。";
+      ? "自然です。次は because を使って理由を足してみましょう。"
+      : "短い文で大丈夫です。主語と動詞をはっきり言いましょう。";
 
   return {
-    partner_reply: `Nice. You can say: "${better}" ${nextQuestion}`,
+    partner_reply: `Great. ${nextQuestion}`,
     better_user_english: better,
     japanese_feedback: `無料練習モードです。${levelTip}`,
-    pronunciation_tip: voiceTip,
+    pronunciation_tip: "英語は一語ずつ止めすぎず、短いかたまりで話すと自然です。",
     next_question: nextQuestion,
     free_mode: true
   };
 }
 
-function buildPrompt({ topic, level, mode, inputLanguage, messages }) {
-  const topicLine = topics[topic] || topics.daily;
-  const levelLine = levels[level] || levels.beginner;
-  const modeLine = mode === "voice"
-    ? "The user is practicing speaking. Keep replies easy to say aloud and include pronunciation advice."
-    : "The user is practicing by text. Keep the conversation natural and easy to continue.";
-  const languageLine = inputLanguage === "ko"
-    ? "The user may answer in Korean. Understand the meaning, convert it into natural English, and continue in English."
-    : inputLanguage === "ja"
-      ? "The user may answer in Japanese. Understand the meaning, convert it into natural English, and continue in English."
-      : "The user may answer in Korean, Japanese, or English. Understand the meaning and continue in English.";
-  const history = messages.slice(-10).map((message) => `${message.role === "user" ? "Learner" : "AI Partner"}: ${message.content}`).join("\n");
+function buildPrompt({ topic, level, messages }) {
+  const history = messages.slice(-12).map((message) => `${message.role === "user" ? "Learner" : "AI Partner"}: ${message.content}`).join("\n");
   return `
-You are Everyday English AI, a friendly English conversation partner for a Japanese-speaking learner.
+You are Everyday English Speak, a voice conversation partner for an English learner.
 
-Topic: ${topicLine}
-Level: ${levelLine}
-Mode: ${modeLine}
-Input language: ${languageLine}
+The learner may speak Korean, Japanese, or English. Infer the meaning, convert it into natural English, and continue the conversation in spoken English.
 
-Conversation so far:
+Topic: ${topics[topic] || topics.daily}
+Level: ${levels[level] || levels.beginner}
+
+Conversation:
 ${history || "No conversation yet."}
-
-Task:
-1. Continue the conversation as a friendly AI partner in natural English.
-2. If the learner used Korean or Japanese, translate the meaning into natural English.
-3. Correct the learner's English kindly.
-4. Explain the correction briefly in Japanese.
-5. Give one pronunciation tip in Japanese.
-6. Ask one realistic next question in English.
 
 Return only JSON:
 {
-  "partner_reply": "one or two natural English sentences from the AI conversation partner",
-  "better_user_english": "a corrected or natural English version of the learner's last message",
-  "japanese_feedback": "short Japanese explanation",
-  "pronunciation_tip": "short Japanese pronunciation tip",
-  "next_question": "one next question in English"
+  "partner_reply": "one or two short spoken English sentences. End with one easy question.",
+  "better_user_english": "natural English version of the learner's last message",
+  "japanese_feedback": "short correction explanation in Japanese",
+  "pronunciation_tip": "short pronunciation tip in Japanese",
+  "next_question": "the next English question"
 }
 `;
 }
@@ -169,10 +148,10 @@ module.exports = async function handler(req, res) {
 
   let body;
   try { body = await readBody(req); } catch { return jsonResponse(res, 400, { error: "Request body must be valid JSON." }); }
-  const { topic = "daily", level = "beginner", mode = "text", inputLanguage = "auto", messages = [] } = body;
+  const { topic = "daily", level = "beginner", messages = [] } = body;
   if (!Array.isArray(messages)) return jsonResponse(res, 400, { error: "messages must be an array." });
 
-  const fallback = () => localFallback({ topic, level, mode, messages });
+  const fallback = () => localFallback({ topic, level, messages });
   if (!process.env.OPENAI_API_KEY) return jsonResponse(res, 200, fallback());
 
   try {
@@ -184,7 +163,7 @@ module.exports = async function handler(req, res) {
       },
       body: JSON.stringify({
         model: process.env.OPENAI_MODEL || "gpt-4.1-mini",
-        input: buildPrompt({ topic, level, mode, inputLanguage, messages }),
+        input: buildPrompt({ topic, level, messages }),
         text: { format: { type: "json_object" } }
       })
     });
@@ -203,7 +182,7 @@ module.exports = async function handler(req, res) {
       parsed = { ...fallback(), partner_reply: text || fallback().partner_reply };
     }
     jsonResponse(res, 200, parsed);
-  } catch (error) {
+  } catch {
     jsonResponse(res, 200, fallback());
   }
 };

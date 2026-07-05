@@ -133,6 +133,10 @@ h2 {
   margin-bottom: 14px;
 }
 
+.compact-controls {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .control-panel label {
   display: grid;
   gap: 6px;
@@ -207,6 +211,14 @@ select {
 
 .mic-button small {
   opacity: 0.88;
+}
+
+.voice-status {
+  min-height: 24px;
+  margin: -2px 0 14px;
+  color: var(--green-dark);
+  font-weight: 800;
+  text-align: center;
 }
 
 .ai-messages {

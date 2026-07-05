@@ -7,16 +7,16 @@
     <meta name="mobile-web-app-capable" content="yes">
     <title>Everyday English Speak</title>
     <link rel="icon" href="icons/app-icon.svg" type="image/svg+xml">
-    <link rel="manifest" href="manifest.webmanifest?v=5">
-    <link rel="stylesheet" href="styles.css?v=5">
+    <link rel="manifest" href="manifest.webmanifest?v=7">
+    <link rel="stylesheet" href="styles.css?v=7">
   </head>
   <body>
     <main class="app-shell">
       <header class="speak-hero">
         <div>
           <p class="eyebrow">Everyday English Speak</p>
-          <h1>AIと話して英会話</h1>
-          <p>韓国語・日本語・英語で話すと、英語に直して、自然な返事と発音のコツを返します。</p>
+          <h1>AIと英語で話す</h1>
+          <p>韓国語・日本語・英語でそのまま話してください。AIが自然な英語に直して、英語の声で返事します。</p>
         </div>
         <div class="hero-badge" aria-label="Practice count">
           <span>Today</span>
@@ -24,23 +24,7 @@
         </div>
       </header>
 
-      <section class="control-panel" aria-label="会話設定">
-        <label>
-          <span>練習モード</span>
-          <select id="conversationMode">
-            <option value="voice">マイクで会話</option>
-            <option value="text">テキスト会話</option>
-          </select>
-        </label>
-        <label>
-          <span>話す言語</span>
-          <select id="inputLanguage">
-            <option value="auto">Auto</option>
-            <option value="ko">한국어</option>
-            <option value="ja">日本語</option>
-            <option value="en">English</option>
-          </select>
-        </label>
+      <section class="control-panel compact-controls" aria-label="会話設定">
         <label>
           <span>レベル</span>
           <select id="levelSelect">
@@ -67,37 +51,39 @@
       <section class="speak-panel">
         <div class="section-heading">
           <div>
-            <p class="eyebrow">AI Conversation</p>
-            <h2>Speak Partner</h2>
+            <p class="eyebrow">Live Conversation</p>
+            <h2>AI Voice Partner</h2>
           </div>
           <button id="resetChat" class="secondary-button" type="button">リセット</button>
         </div>
 
         <button id="voiceButton" class="mic-button" type="button">
           <span class="mic-icon">🎙</span>
-          <strong>押して話す</strong>
-          <small>マイク許可が必要です</small>
+          <strong>会話を始める</strong>
+          <small>押したら話してください</small>
         </button>
+
+        <p id="voiceStatus" class="voice-status">韓国語・日本語・英語、どれで話してもOKです。</p>
 
         <div id="aiMessages" class="ai-messages" aria-live="polite"></div>
 
         <form id="aiForm" class="ai-form">
-          <textarea id="aiInput" rows="3" placeholder="話した内容、または英文を書いてください。例: 오늘 친구랑 카페에 갔어 / I went to a cafe."></textarea>
-          <button class="primary-button" type="submit">AIに送る</button>
+          <textarea id="aiInput" rows="3" placeholder="マイクが使えない時だけ、ここに入力してください。例: 안녕하세요 / こんにちは / Hello"></textarea>
+          <button class="primary-button" type="submit">テキストで送る</button>
         </form>
       </section>
 
       <section class="mission-strip" aria-label="練習ステップ">
-        <article><span>1</span><p>韓国語・日本語・英語で話す</p></article>
-        <article><span>2</span><p>自然な英語に直してもらう</p></article>
-        <article><span>3</span><p>AIの質問に続けて答える</p></article>
+        <article><span>1</span><p>そのまま話す</p></article>
+        <article><span>2</span><p>自然な英語に直る</p></article>
+        <article><span>3</span><p>英語の声で返事が来る</p></article>
       </section>
 
       <section class="phrase-panel">
         <div class="section-heading">
           <div>
             <p class="eyebrow">Quick Starter</p>
-            <h2>会話を始める一言</h2>
+            <h2>話し始める例</h2>
           </div>
           <button id="newPrompt" class="icon-button" type="button" aria-label="新しい質問">+</button>
         </div>
@@ -105,10 +91,10 @@
         <p id="answerStarter" class="starter-line"></p>
       </section>
     </main>
-    <script src="app.js?v=5"></script>
+    <script src="app.js?v=7"></script>
     <script>
       if ("serviceWorker" in navigator) {
-        window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js?v=5"));
+        window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js?v=7"));
       }
     </script>
   </body>
