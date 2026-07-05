@@ -13,6 +13,31 @@ function jsonResponse(res, status, body) {
   res.end(JSON.stringify(body));
 }
 
+function readBody(req) {
+  if (req.body && typeof req.body === "object") {
+    return Promise.resolve(req.body);
+  }
+
+  return new Promise((resolve, reject) => {
+    let raw = "";
+    req.on("data", (chunk) => {
+      raw += chunk;
+    });
+    req.on("end", () => {
+      if (!raw) {
+        resolve({});
+        return;
+      }
+      try {
+        resolve(JSON.parse(raw));
+      } catch (error) {
+        reject(error);
+      }
+    });
+    req.on("error", reject);
+  });
+}
+
 function buildPrompt(scenario, messages) {
   const scenarioLine = scenarios[scenario] || scenarios.smalltalk;
   const history = messages
@@ -57,7 +82,7 @@ function extractText(data) {
     .join("\n");
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -80,7 +105,15 @@ export default async function handler(req, res) {
     return;
   }
 
-  const { scenario = "smalltalk", messages = [] } = req.body || {};
+  let body;
+  try {
+    body = await readBody(req);
+  } catch {
+    jsonResponse(res, 400, { error: "Request body must be valid JSON." });
+    return;
+  }
+
+  const { scenario = "smalltalk", messages = [] } = body;
 
   if (!Array.isArray(messages)) {
     jsonResponse(res, 400, { error: "messages must be an array." });
@@ -135,4 +168,4 @@ export default async function handler(req, res) {
       error: error.message || "Unexpected server error."
     });
   }
-}
+};

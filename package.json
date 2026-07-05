@@ -2,12 +2,7 @@
   "name": "guesttalk-english-ai",
   "version": "1.0.0",
   "private": true,
-  "type": "module",
   "scripts": {
-    "start": "vercel dev",
     "check": "node tests/ai-project-check.cjs && node --check api/chat.js && node --check public/app.js"
-  },
-  "devDependencies": {
-    "vercel": "^46.0.0"
   }
 }

@@ -17,7 +17,7 @@ assert(fs.existsSync(path.join(root, "public", "app.js")), "public/app.js must e
 assert(fs.existsSync(path.join(root, "public", "manifest.webmanifest")), "public/manifest.webmanifest must exist");
 
 const pkg = JSON.parse(read("package.json"));
-assert(pkg.scripts && pkg.scripts.start, "package.json must define start script");
+assert(pkg.scripts && pkg.scripts.check, "package.json must define check script");
 
 const html = read("public/index.html");
 assert(html.includes("aiScenario"), "AI scenario select must be present");
@@ -36,5 +36,6 @@ assert(api.includes("https://api.openai.com/v1/responses"), "API must use OpenAI
 assert(api.includes("guest_reply"), "API prompt must request guest_reply");
 assert(api.includes("japanese_feedback"), "API prompt must request Japanese feedback");
 assert(!api.includes("korean_feedback"), "API should not request Korean feedback");
+assert(api.includes("module.exports"), "API must use Vercel-compatible CommonJS export");
 
 console.log("AI project checks passed");
