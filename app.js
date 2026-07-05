@@ -21,7 +21,10 @@ const state = {
   recognition: null,
   languageIndex: 0,
   listenTimer: null,
-  speechTimer: null
+  speechTimer: null,
+  currentRecognitionLang: "",
+  preferredRecognitionLang: "",
+  lastResultAt: 0
 };
 
 const recognitionLangs = ["ko-KR", "ja-JP", "en-US"];
@@ -70,6 +73,13 @@ function scheduleListening(delay = 700) {
   clearTimeout(state.listenTimer);
   if (!state.isConversationActive || state.isSending) return;
   state.listenTimer = setTimeout(startListening, delay);
+}
+
+function rotateRecognitionLanguage() {
+  const langs = orderedRecognitionLangs();
+  const current = state.currentRecognitionLang || state.preferredRecognitionLang || langs[0];
+  const currentIndex = Math.max(0, langs.indexOf(current));
+  state.preferredRecognitionLang = langs[(currentIndex + 1) % langs.length];
 }
 
 function showWelcome() {
@@ -137,6 +147,7 @@ async function sendTextToAi(text, source = "voice") {
         level: els.levelSelect.value,
         topic: els.topicSelect.value,
         inputLanguage: "auto",
+        recognitionLanguage: state.currentRecognitionLang || "auto",
         messages: state.messages
       })
     });
@@ -218,18 +229,23 @@ function setupSpeechRecognition() {
     const result = event.results[event.results.length - 1][0];
     const transcript = result.transcript.trim();
     state.isListening = false;
+    state.lastResultAt = Date.now();
     if (!transcript) {
       updateStatus("I could not hear clearly. Please speak again.");
-      if (state.isConversationActive) setTimeout(startListening, 500);
+      rotateRecognitionLanguage();
+      if (state.isConversationActive) scheduleListening(500);
       return;
     }
+    state.preferredRecognitionLang = state.currentRecognitionLang;
     updateStatus(`Heard: ${transcript}`);
     sendTextToAi(transcript, "voice");
   });
 
   state.recognition.addEventListener("end", () => {
     state.isListening = false;
+    if (Date.now() - state.lastResultAt < 1500) return;
     if (state.isConversationActive && !state.isSending) {
+      rotateRecognitionLanguage();
       updateStatus("Listening restarted. Please speak again.");
       scheduleListening(500);
     }
@@ -241,18 +257,23 @@ function setupSpeechRecognition() {
       ? "マイクが許可されていません。ブラウザのマイク許可を確認してください。"
       : "音声を聞き取れませんでした。もう一度話してください。";
     updateStatus(message);
-    if (event.error !== "not-allowed") scheduleListening(900);
+    if (event.error !== "not-allowed") {
+      rotateRecognitionLanguage();
+      scheduleListening(900);
+    }
   });
 }
 
 function startListening() {
   if (!state.recognition || state.isListening || state.isSending || !state.isConversationActive) return;
   const langs = orderedRecognitionLangs();
-  state.recognition.lang = langs[state.languageIndex % langs.length];
-  state.languageIndex += 1;
+  if (!state.preferredRecognitionLang) state.preferredRecognitionLang = langs[0];
+  state.currentRecognitionLang = state.preferredRecognitionLang;
+  state.recognition.lang = state.currentRecognitionLang;
   try {
     state.recognition.start();
   } catch {
+    rotateRecognitionLanguage();
     scheduleListening(900);
   }
 }
@@ -260,6 +281,8 @@ function startListening() {
 function startConversation() {
   state.isConversationActive = true;
   state.languageIndex = 0;
+  state.preferredRecognitionLang = orderedRecognitionLangs()[0];
+  state.currentRecognitionLang = state.preferredRecognitionLang;
   updateVoiceButton();
   startListening();
 }

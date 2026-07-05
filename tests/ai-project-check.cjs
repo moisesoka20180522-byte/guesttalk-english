@@ -24,7 +24,7 @@ assert(!html.includes("inputLanguage"), "manual input language selector should b
 assert(!html.includes("conversationMode"), "manual conversation mode selector should be removed");
 assert(html.includes("levelSelect"), "level selector must remain");
 assert(html.includes("topicSelect"), "topic selector must remain");
-assert(html.includes("v=8"), "cache-busting version must be updated");
+assert(html.includes("v=9"), "cache-busting version must be updated");
 assert(html.includes('lang="ja"'), "HTML language must be Japanese");
 
 const app = read("app.js");
@@ -33,6 +33,8 @@ assert(app.includes("toggleConversation"), "frontend must support live conversat
 assert(app.includes("startListening"), "frontend must restart listening after AI voice reply");
 assert(app.includes("scheduleListening"), "frontend must restart listening after silent speech recognition end");
 assert(app.includes("speechTimer"), "frontend must recover if speech synthesis end event is missed");
+assert(app.includes("preferredRecognitionLang"), "frontend must keep the last successful recognition language");
+assert(app.includes("recognitionLanguage"), "frontend must send recognition locale to the API");
 assert(app.includes("SpeechRecognition"), "frontend must support speech recognition");
 assert(app.includes("speechSynthesis"), "frontend must support AI speech playback");
 assert(app.includes("ko-KR"), "frontend must try Korean recognition");
@@ -45,6 +47,8 @@ assert(api.includes("OPENAI_API_KEY"), "API must read OPENAI_API_KEY from env");
 assert(api.includes("localFallback"), "API must include no-payment local fallback");
 assert(api.includes("free_mode"), "API fallback must mark free_mode");
 assert(api.includes("Korean, Japanese, or English"), "API prompt must support multilingual user speech");
+assert(api.includes("wrong locale"), "API prompt must handle wrong speech recognition locale");
+assert(api.includes("i know how to say you"), "API fallback must handle common Korean greeting misrecognition");
 assert(api.includes("https://api.openai.com/v1/responses"), "API must optionally use OpenAI Responses API");
 assert(api.includes("partner_reply"), "API prompt must request partner_reply");
 assert(api.includes("better_user_english"), "API prompt must request better_user_english");

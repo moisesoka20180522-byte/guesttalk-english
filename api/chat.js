@@ -65,9 +65,13 @@ function polishEnglish(text) {
 
 function simpleEnglishFromAnyLanguage(text, topic) {
   const source = String(text || "");
+  const lower = source.toLowerCase();
   if (!source) return "I want to practice English.";
+  if (/안녕|こんにちは|おはよう|こんばんは|annyeong|anyeong/.test(source)) return "Hello. Nice to talk with you.";
+  if (/i know how to say you|i know how to say yo|i don't know how to say you|i know say you|i know how say you/.test(lower)) return "Hello. Nice to talk with you.";
+  if (/arigato|ありがとう|고마워|감사/.test(source)) return "Thank you.";
+  if (/sumimasen|すみません|죄송|미안/.test(source)) return "I'm sorry.";
   if (/[a-z]/i.test(source)) return polishEnglish(source);
-  if (/안녕|こんにちは|おはよう|こんばんは/.test(source)) return "Hello. Nice to talk with you.";
   if (/카페|커피|カフェ|コーヒー/.test(source)) return "I went to a cafe today.";
   if (/친구|友達/.test(source)) return "I met my friend today.";
   if (/일|仕事|회사|会社/.test(source)) return "Work was busy today.";
@@ -100,12 +104,14 @@ function localFallback({ topic, level, messages }) {
   };
 }
 
-function buildPrompt({ topic, level, messages }) {
+function buildPrompt({ topic, level, recognitionLanguage, messages }) {
   const history = messages.slice(-12).map((message) => `${message.role === "user" ? "Learner" : "AI Partner"}: ${message.content}`).join("\n");
   return `
 You are Everyday English Speak, a voice conversation partner for an English learner.
 
 The learner may speak Korean, Japanese, or English. Infer the meaning, convert it into natural English, and continue the conversation in spoken English.
+The browser speech recognizer may use the wrong locale and produce a phonetic or nonsensical transcript. If the transcript looks unnatural, infer the likely intended Korean/Japanese/English phrase instead of correcting the transcript literally.
+Recognizer locale: ${recognitionLanguage || "auto"}
 
 Topic: ${topics[topic] || topics.daily}
 Level: ${levels[level] || levels.beginner}
@@ -148,7 +154,7 @@ module.exports = async function handler(req, res) {
 
   let body;
   try { body = await readBody(req); } catch { return jsonResponse(res, 400, { error: "Request body must be valid JSON." }); }
-  const { topic = "daily", level = "beginner", messages = [] } = body;
+  const { topic = "daily", level = "beginner", recognitionLanguage = "auto", messages = [] } = body;
   if (!Array.isArray(messages)) return jsonResponse(res, 400, { error: "messages must be an array." });
 
   const fallback = () => localFallback({ topic, level, messages });
@@ -163,7 +169,7 @@ module.exports = async function handler(req, res) {
       },
       body: JSON.stringify({
         model: process.env.OPENAI_MODEL || "gpt-4.1-mini",
-        input: buildPrompt({ topic, level, messages }),
+        input: buildPrompt({ topic, level, recognitionLanguage, messages }),
         text: { format: { type: "json_object" } }
       })
     });
