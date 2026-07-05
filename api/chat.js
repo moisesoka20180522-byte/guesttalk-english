@@ -10,9 +10,9 @@ const topics = {
 };
 
 const levels = {
-  beginner: "Beginner: use short, simple English. Ask one easy question.",
+  beginner: "Beginner: use short, simple English. Teach one point at a time.",
   intermediate: "Intermediate: use natural English and concise correction.",
-  advanced: "Advanced: use realistic English and stricter correction."
+  advanced: "Advanced: use realistic English, nuance, and stricter correction."
 };
 
 const nextQuestions = {
@@ -50,6 +50,11 @@ function lastUserText(messages) {
   return String(last?.content || "").trim();
 }
 
+function isExpressionQuestion(text) {
+  const source = String(text || "").toLowerCase();
+  return /영어로|어떻게 말|어떻게 표현|표현해|뭐라고 해|how do i say|how can i say|英語で|どう言|表現/.test(source);
+}
+
 function polishEnglish(text) {
   let value = String(text || "").trim();
   if (!value) return "I want to practice English.";
@@ -84,10 +89,49 @@ function simpleEnglishFromAnyLanguage(text, topic) {
   return "I want to talk about my day.";
 }
 
+function expressionFallback(userText) {
+  if (/체크인|check.?in|チェックイン/.test(userText)) {
+    return [
+      "Check-in starts at 3 p.m.",
+      "You can check in from 3 p.m.",
+      "Your room will be ready from 3 p.m."
+    ];
+  }
+  if (/여기|場所|place|어디/.test(userText)) {
+    return [
+      "Is this the right place?",
+      "Am I in the right place?",
+      "Is this where I should check in?"
+    ];
+  }
+  return [
+    "How can I say this in English?",
+    "What is a natural way to say this in English?",
+    "How would you say this in everyday English?"
+  ];
+}
+
 function localFallback({ topic, level, messages }) {
-  const better = simpleEnglishFromAnyLanguage(lastUserText(messages), topic);
+  const userText = lastUserText(messages);
+  const expressionQuestion = isExpressionQuestion(userText);
   const questions = nextQuestions[topic] || nextQuestions.daily;
   const nextQuestion = questions[messages.length % questions.length];
+
+  if (expressionQuestion) {
+    const options = expressionFallback(userText);
+    return {
+      intent: "expression_question",
+      partner_reply: `Try this: "${options[0]}" Please repeat it after me.`,
+      better_user_english: options[0],
+      expression_options: options,
+      japanese_feedback: "英語でどう言うかを聞く時は、まず一番シンプルな表現を覚えると会話で使いやすいです。",
+      pronunciation_tip: "文を全部同じ強さで読まず、大事な単語を少し強く言いましょう。",
+      next_question: "Can you repeat that sentence once?",
+      free_mode: true
+    };
+  }
+
+  const better = simpleEnglishFromAnyLanguage(userText, topic);
   const levelTip = level === "advanced"
     ? "理由や具体例を足すと、より自然な上級英語になります。"
     : level === "intermediate"
@@ -95,8 +139,10 @@ function localFallback({ topic, level, messages }) {
       : "短い文で大丈夫です。主語と動詞をはっきり言いましょう。";
 
   return {
+    intent: "conversation_practice",
     partner_reply: `Great. ${nextQuestion}`,
     better_user_english: better,
+    expression_options: [],
     japanese_feedback: `無料練習モードです。${levelTip}`,
     pronunciation_tip: "英語は一語ずつ止めすぎず、短いかたまりで話すと自然です。",
     next_question: nextQuestion,
@@ -107,12 +153,28 @@ function localFallback({ topic, level, messages }) {
 function buildPrompt({ topic, level, recognitionLanguage, messages }) {
   const history = messages.slice(-12).map((message) => `${message.role === "user" ? "Learner" : "AI Partner"}: ${message.content}`).join("\n");
   return `
-You are Everyday English Speak, a voice conversation partner for an English learner.
+You are Everyday English Coach, a warm ChatGPT-style English teacher for daily conversation practice.
 
-The learner may speak Korean, Japanese, or English. Infer the meaning, convert it into natural English, and continue the conversation in spoken English.
+The learner may speak Korean, Japanese, or English. Infer the meaning, convert it into natural English, and teach useful daily English.
 The browser speech recognizer may use the wrong locale and produce a phonetic or nonsensical transcript. If the transcript looks unnatural, infer the likely intended Korean/Japanese/English phrase instead of correcting the transcript literally.
-Recognizer locale: ${recognitionLanguage || "auto"}
 
+You must detect the learner's intent:
+- "conversation_practice": the learner is trying to chat or practice a sentence.
+- "expression_question": the learner asks how to say something in English, for example Korean/Japanese questions like "이건 영어로 어떻게 말해?", "이런 상황에서 뭐라고 해?", "英語でどう言う？"
+
+If intent is "expression_question":
+1. Give 2 or 3 natural English options.
+2. Explain when to use them in Japanese.
+3. Give one pronunciation tip.
+4. Make partner_reply a short English sentence the learner should repeat aloud.
+
+If intent is "conversation_practice":
+1. Correct the learner's expression into natural English.
+2. Explain briefly in Japanese.
+3. Give one pronunciation tip.
+4. Continue with one easy spoken English question.
+
+Recognizer locale: ${recognitionLanguage || "auto"}
 Topic: ${topics[topic] || topics.daily}
 Level: ${levels[level] || levels.beginner}
 
@@ -121,11 +183,13 @@ ${history || "No conversation yet."}
 
 Return only JSON:
 {
-  "partner_reply": "one or two short spoken English sentences. End with one easy question.",
-  "better_user_english": "natural English version of the learner's last message",
-  "japanese_feedback": "short correction explanation in Japanese",
+  "intent": "conversation_practice or expression_question",
+  "partner_reply": "one short English sentence to speak aloud to the learner",
+  "better_user_english": "best natural English version of the learner's last message",
+  "expression_options": ["optional natural English option 1", "optional option 2", "optional option 3"],
+  "japanese_feedback": "teacher explanation in Japanese",
   "pronunciation_tip": "short pronunciation tip in Japanese",
-  "next_question": "the next English question"
+  "next_question": "one next English practice question"
 }
 `;
 }

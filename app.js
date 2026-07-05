@@ -84,8 +84,8 @@ function rotateRecognitionLanguage() {
 
 function showWelcome() {
   addMessage("assistant", `
-    <strong>AI Voice Partner</strong>
-    <p>Press the green button and speak. I will correct your message into English and answer by voice.</p>
+    <strong>AI English Coach</strong>
+    <p>Ask me how to say something in English, or speak freely for daily conversation practice.</p>
     <small>${levelLabels[els.levelSelect.value]}。無料モードでは簡易練習、API接続時はAI会話になります。</small>
   `);
 }
@@ -106,10 +106,15 @@ function showRandomPrompt() {
 
 function renderAiResponse(data) {
   const partnerReply = data.partner_reply || data.next_question || "";
+  const options = Array.isArray(data.expression_options) ? data.expression_options : [];
+  const optionsHtml = options.length
+    ? `<b>Expression options</b><ul class="expression-options">${options.map((option) => `<li>${escapeHtml(option)}</li>`).join("")}</ul>`
+    : "";
   addMessage("assistant", `
-    <strong>AI Voice Partner</strong>
+    <strong>AI English Coach</strong>
     <p>${escapeHtml(data.better_user_english || "Good. Keep going.")}</p>
     <div class="feedback-box">
+      ${optionsHtml}
       <b>AI voice reply</b>
       <p>${escapeHtml(partnerReply)}</p>
       <b>日本語フィードバック</b>

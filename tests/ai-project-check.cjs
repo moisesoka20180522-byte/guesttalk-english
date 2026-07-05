@@ -17,14 +17,14 @@ assert(fs.existsSync(path.join(root, "app.js")), "app.js must exist at project r
 assert(fs.existsSync(path.join(root, "manifest.webmanifest")), "manifest.webmanifest must exist at project root");
 
 const html = read("index.html");
-assert(html.includes("AIと英語で話す"), "voice conversation headline must be present");
+assert(html.includes("AI English Coach"), "English coach label must be present");
 assert(html.includes("voiceButton"), "main voice button must be present");
 assert(html.includes("voiceStatus"), "voice status must be present");
 assert(!html.includes("inputLanguage"), "manual input language selector should be removed");
 assert(!html.includes("conversationMode"), "manual conversation mode selector should be removed");
 assert(html.includes("levelSelect"), "level selector must remain");
 assert(html.includes("topicSelect"), "topic selector must remain");
-assert(html.includes("v=9"), "cache-busting version must be updated");
+assert(html.includes("v=10"), "cache-busting version must be updated");
 assert(html.includes('lang="ja"'), "HTML language must be Japanese");
 
 const app = read("app.js");
@@ -35,6 +35,8 @@ assert(app.includes("scheduleListening"), "frontend must restart listening after
 assert(app.includes("speechTimer"), "frontend must recover if speech synthesis end event is missed");
 assert(app.includes("preferredRecognitionLang"), "frontend must keep the last successful recognition language");
 assert(app.includes("recognitionLanguage"), "frontend must send recognition locale to the API");
+assert(app.includes("expression_options"), "frontend must render expression options");
+assert(app.includes("AI English Coach"), "frontend must use English coach wording");
 assert(app.includes("SpeechRecognition"), "frontend must support speech recognition");
 assert(app.includes("speechSynthesis"), "frontend must support AI speech playback");
 assert(app.includes("ko-KR"), "frontend must try Korean recognition");
@@ -44,11 +46,14 @@ assert(app.includes("inputLanguage: \"auto\""), "frontend must send auto languag
 
 const api = read("api/chat.js");
 assert(api.includes("OPENAI_API_KEY"), "API must read OPENAI_API_KEY from env");
+assert(api.includes("Everyday English Coach"), "API prompt must use English coach role");
 assert(api.includes("localFallback"), "API must include no-payment local fallback");
 assert(api.includes("free_mode"), "API fallback must mark free_mode");
 assert(api.includes("Korean, Japanese, or English"), "API prompt must support multilingual user speech");
 assert(api.includes("wrong locale"), "API prompt must handle wrong speech recognition locale");
 assert(api.includes("i know how to say you"), "API fallback must handle common Korean greeting misrecognition");
+assert(api.includes("expression_question"), "API must detect expression questions");
+assert(api.includes("expression_options"), "API must return expression options");
 assert(api.includes("https://api.openai.com/v1/responses"), "API must optionally use OpenAI Responses API");
 assert(api.includes("partner_reply"), "API prompt must request partner_reply");
 assert(api.includes("better_user_english"), "API prompt must request better_user_english");

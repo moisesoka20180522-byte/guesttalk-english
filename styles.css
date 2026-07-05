@@ -273,6 +273,17 @@ select {
   color: var(--green-dark);
 }
 
+.expression-options {
+  margin: 0 0 4px;
+  padding-left: 20px;
+  color: var(--ink);
+}
+
+.expression-options li {
+  margin: 2px 0;
+  line-height: 1.45;
+}
+
 .ai-form {
   display: grid;
   gap: 10px;
