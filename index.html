@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#1f7a4d">
     <meta name="mobile-web-app-capable" content="yes">
-    <title>GuestTalk English AI</title>
+    <title>Everyday English AI</title>
     <link rel="icon" href="icons/app-icon.svg" type="image/svg+xml">
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="stylesheet" href="styles.css">
@@ -14,8 +14,8 @@
     <main class="app-shell">
       <header class="topbar">
         <div>
-          <p class="eyebrow">GuestTalk AI</p>
-          <h1>AIゲストと場面別に英会話</h1>
+          <p class="eyebrow">Everyday English AI</p>
+          <h1>AIと日常英会話</h1>
         </div>
         <section class="today-card" aria-label="今日の練習記録">
           <span class="today-label">今日の会話</span>
@@ -24,50 +24,43 @@
         </section>
       </header>
 
+      <section class="control-panel" aria-label="会話設定">
+        <label><span>会話スタイル</span><select id="conversationMode"><option value="text">テキスト会話</option><option value="voice">話す練習</option></select></label>
+        <label><span>レベル</span><select id="levelSelect"><option value="beginner">初級</option><option value="intermediate">中級</option><option value="advanced">上級</option></select></label>
+        <label><span>トピック</span><select id="topicSelect"><option value="daily">日常会話</option><option value="self_intro">自己紹介</option><option value="travel">旅行</option><option value="food">食事・カフェ</option><option value="shopping">買い物</option><option value="work">仕事</option><option value="friends">友達との会話</option><option value="free">フリートーク</option></select></label>
+      </section>
+
       <section class="ai-panel">
         <div class="section-heading">
           <div>
-            <p class="eyebrow">AI Roleplay</p>
-            <h2>宿泊ゲスト役のAIと会話</h2>
+            <p class="eyebrow">AI Conversation</p>
+            <h2>AI会話パートナー</h2>
           </div>
-          <select id="aiScenario" aria-label="AI英会話の場面">
-            <option value="checkin">チェックイン</option>
-            <option value="room">客室案内</option>
-            <option value="local">周辺案内</option>
-            <option value="issues">トラブル対応</option>
-            <option value="checkout">チェックアウト</option>
-            <option value="smalltalk">雑談</option>
-          </select>
+          <button id="resetChat" class="secondary-button" type="button">リセット</button>
         </div>
 
         <div id="aiMessages" class="ai-messages" aria-live="polite"></div>
 
         <form id="aiForm" class="ai-form">
-          <textarea id="aiInput" rows="3" placeholder="英語で返事を書いてください。例: Welcome! May I check your reservation name?"></textarea>
-          <button class="primary-button" type="submit">AIゲストに話す</button>
+          <textarea id="aiInput" rows="3" placeholder="英語で返事を書いてください。例: I usually drink coffee in the morning."></textarea>
+          <div class="button-row">
+            <button id="voiceButton" class="secondary-button voice-only" type="button">マイクで話す</button>
+            <button class="primary-button" type="submit">AIに送る</button>
+          </div>
         </form>
       </section>
 
       <section class="mission-strip" aria-label="今日の練習ミッション">
-        <article>
-          <span>1</span>
-          <p>AIゲストの質問に英語で答える</p>
-        </article>
-        <article>
-          <span>2</span>
-          <p>添削された英文を声に出す</p>
-        </article>
-        <article>
-          <span>3</span>
-          <p>次の質問まで会話を続ける</p>
-        </article>
+        <article><span>1</span><p>AIの質問に英語で答える</p></article>
+        <article><span>2</span><p>添削された英文を声に出す</p></article>
+        <article><span>3</span><p>次の質問まで会話を続ける</p></article>
       </section>
 
       <section class="phrase-panel">
         <div class="section-heading">
           <div>
-            <p class="eyebrow">Quick Phrases</p>
-            <h2>民泊でそのまま使える英語</h2>
+            <p class="eyebrow">Quick Starter</p>
+            <h2>会話を始める一言</h2>
           </div>
           <button id="newPrompt" class="icon-button" type="button" aria-label="新しい表現">+</button>
         </div>
@@ -75,13 +68,10 @@
         <p id="answerStarter" class="starter-line"></p>
       </section>
     </main>
-
     <script src="app.js"></script>
     <script>
       if ("serviceWorker" in navigator) {
-        window.addEventListener("load", () => {
-          navigator.serviceWorker.register("./service-worker.js");
-        });
+        window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js"));
       }
     </script>
   </body>

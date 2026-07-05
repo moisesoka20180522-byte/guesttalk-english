@@ -1,7 +1,7 @@
 {
-  "name": "GuestTalk English AI",
-  "short_name": "GuestTalk AI",
-  "description": "AIゲストと場面別に英会話を練習するアプリ",
+  "name": "Everyday English AI",
+  "short_name": "English AI",
+  "description": "AIと日常英会話を練習するアプリ",
   "lang": "ja",
   "start_url": "./index.html",
   "scope": "./",

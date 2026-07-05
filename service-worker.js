@@ -1,4 +1,4 @@
-const CACHE_NAME = "guesttalk-ai-v2";
+const CACHE_NAME = "everyday-english-ai-v1";
 const APP_ASSETS = [
   "./",
   "./index.html",

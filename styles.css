@@ -69,6 +69,7 @@ h2 {
 }
 
 .today-card,
+.control-panel,
 .ai-panel,
 .mission-strip article,
 .phrase-panel {
@@ -76,6 +77,25 @@ h2 {
   border: 1px solid var(--line);
   border-radius: 8px;
   box-shadow: var(--shadow);
+}
+
+.control-panel {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+.control-panel label {
+  display: grid;
+  gap: 6px;
+}
+
+.control-panel span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .today-card {
@@ -188,6 +208,7 @@ textarea {
 }
 
 .primary-button,
+.secondary-button,
 .icon-button {
   min-height: 44px;
   border-radius: 8px;
@@ -200,6 +221,33 @@ textarea {
   background: var(--green);
   color: #ffffff;
   font-weight: 700;
+}
+
+.secondary-button {
+  border: 1px solid var(--green);
+  background: #ffffff;
+  color: var(--green-dark);
+  font-weight: 700;
+}
+
+.primary-button:disabled,
+.secondary-button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.button-row {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 10px;
+}
+
+body[data-mode="text"] .voice-only {
+  display: none;
+}
+
+body[data-mode="text"] .button-row {
+  grid-template-columns: 1fr;
 }
 
 .icon-button {
@@ -258,6 +306,14 @@ textarea {
   .section-heading {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .control-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .button-row {
+    grid-template-columns: 1fr;
   }
 
   .mission-strip {
