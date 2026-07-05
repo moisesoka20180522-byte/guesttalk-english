@@ -1,23 +1,23 @@
 const prompts = [
   {
     question: "May I check the name on your reservation?",
-    starter: "예약 확인: May I check the name on your reservation?"
+    starter: "予約確認: May I check the name on your reservation?"
   },
   {
     question: "The Wi-Fi password is written here.",
-    starter: "객실 안내: The Wi-Fi password is written here."
+    starter: "客室案内: The Wi-Fi password is written here."
   },
   {
     question: "There are a few good restaurants nearby.",
-    starter: "동네 추천: There are a few good restaurants nearby."
+    starter: "周辺案内: There are a few good restaurants nearby."
   },
   {
     question: "I'm sorry for the inconvenience. I'll check it right away.",
-    starter: "문제 대응: I'm sorry for the inconvenience."
+    starter: "トラブル対応: I'm sorry for the inconvenience."
   },
   {
     question: "How was your stay?",
-    starter: "체크아웃: How was your stay?"
+    starter: "チェックアウト: How was your stay?"
   }
 ];
 
@@ -53,7 +53,7 @@ function showWelcome() {
   addMessage("assistant", `
     <strong>AI Guest</strong>
     <p>Hello! I just arrived. Is this the right place for check-in?</p>
-    <small>영어로 답하면 AI가 손님 역할로 이어가고, 표현을 고쳐줍니다.</small>
+    <small>英語で返事をすると、AIが宿泊ゲスト役で会話を続け、日本語で添削します。</small>
   `);
 }
 
@@ -68,13 +68,13 @@ function renderAiResponse(data) {
     <strong>AI Guest</strong>
     <p>${escapeHtml(data.guest_reply || "")}</p>
     <div class="feedback-box">
-      <b>더 자연스러운 내 표현</b>
-      <p>${escapeHtml(data.better_host_english || "좋아요. 계속 대화를 이어가세요.")}</p>
-      <b>피드백</b>
-      <p>${escapeHtml(data.korean_feedback || "")}</p>
-      <b>발음 팁</b>
+      <b>より自然な英語</b>
+      <p>${escapeHtml(data.better_host_english || "いい感じです。このまま会話を続けましょう。")}</p>
+      <b>日本語フィードバック</b>
+      <p>${escapeHtml(data.japanese_feedback || "")}</p>
+      <b>発音のコツ</b>
       <p>${escapeHtml(data.pronunciation_tip || "")}</p>
-      <b>다음 질문</b>
+      <b>次の質問</b>
       <p>${escapeHtml(data.next_question || "")}</p>
     </div>
   `);
@@ -100,7 +100,7 @@ async function sendAiMessage(event) {
 
   const loading = document.createElement("article");
   loading.className = "message assistant loading";
-  loading.textContent = "AI 손님이 답변 중입니다...";
+  loading.textContent = "AIゲストが返事を考えています...";
   els.aiMessages.append(loading);
 
   try {
@@ -119,7 +119,7 @@ async function sendAiMessage(event) {
     loading.remove();
 
     if (!response.ok) {
-      addMessage("assistant", `<strong>설정 필요</strong><p>${escapeHtml(data.error || "AI 서버 설정을 확인해 주세요.")}</p>`);
+      addMessage("assistant", `<strong>設定が必要です</strong><p>${escapeHtml(data.error || "AIサーバー設定を確認してください。")}</p>`);
       return;
     }
 
@@ -130,7 +130,7 @@ async function sendAiMessage(event) {
     renderAiResponse(data);
   } catch (error) {
     loading.remove();
-    addMessage("assistant", `<strong>연결 오류</strong><p>${escapeHtml(error.message)}</p>`);
+    addMessage("assistant", `<strong>接続エラー</strong><p>${escapeHtml(error.message)}</p>`);
   }
 }
 

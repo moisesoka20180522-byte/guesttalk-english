@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ko">
+<html lang="ja">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -15,12 +15,12 @@
       <header class="topbar">
         <div>
           <p class="eyebrow">GuestTalk AI</p>
-          <h1>AI 손님과 상황별 영어회화</h1>
+          <h1>AIゲストと場面別に英会話</h1>
         </div>
-        <section class="today-card" aria-label="오늘 연습 기록">
-          <span class="today-label">오늘 대화</span>
+        <section class="today-card" aria-label="今日の練習記録">
+          <span class="today-label">今日の会話</span>
           <strong id="practiceCount">0</strong>
-          <span>회</span>
+          <span>回</span>
         </section>
       </header>
 
@@ -28,38 +28,38 @@
         <div class="section-heading">
           <div>
             <p class="eyebrow">AI Roleplay</p>
-            <h2>상황별 손님 역할 대화</h2>
+            <h2>宿泊ゲスト役のAIと会話</h2>
           </div>
-          <select id="aiScenario" aria-label="AI 회화 상황">
-            <option value="checkin">체크인</option>
-            <option value="room">객실 안내</option>
-            <option value="local">동네 추천</option>
-            <option value="issues">문제 대응</option>
-            <option value="checkout">체크아웃</option>
-            <option value="smalltalk">스몰토크</option>
+          <select id="aiScenario" aria-label="AI英会話の場面">
+            <option value="checkin">チェックイン</option>
+            <option value="room">客室案内</option>
+            <option value="local">周辺案内</option>
+            <option value="issues">トラブル対応</option>
+            <option value="checkout">チェックアウト</option>
+            <option value="smalltalk">雑談</option>
           </select>
         </div>
 
         <div id="aiMessages" class="ai-messages" aria-live="polite"></div>
 
         <form id="aiForm" class="ai-form">
-          <textarea id="aiInput" rows="3" placeholder="영어로 답해보세요. 예: Welcome! May I check your reservation name?"></textarea>
-          <button class="primary-button" type="submit">AI 손님에게 말하기</button>
+          <textarea id="aiInput" rows="3" placeholder="英語で返事を書いてください。例: Welcome! May I check your reservation name?"></textarea>
+          <button class="primary-button" type="submit">AIゲストに話す</button>
         </form>
       </section>
 
-      <section class="mission-strip" aria-label="오늘의 연습 미션">
+      <section class="mission-strip" aria-label="今日の練習ミッション">
         <article>
           <span>1</span>
-          <p>AI 손님 질문에 영어로 답하기</p>
+          <p>AIゲストの質問に英語で答える</p>
         </article>
         <article>
           <span>2</span>
-          <p>수정 문장 따라 말하기</p>
+          <p>添削された英文を声に出す</p>
         </article>
         <article>
           <span>3</span>
-          <p>다음 질문까지 대화 이어가기</p>
+          <p>次の質問まで会話を続ける</p>
         </article>
       </section>
 
@@ -67,9 +67,9 @@
         <div class="section-heading">
           <div>
             <p class="eyebrow">Quick Phrases</p>
-            <h2>바로 쓰는 민박 영어</h2>
+            <h2>民泊でそのまま使える英語</h2>
           </div>
-          <button id="newPrompt" class="icon-button" type="button" aria-label="새 표현">+</button>
+          <button id="newPrompt" class="icon-button" type="button" aria-label="新しい表現">+</button>
         </div>
         <p id="talkPrompt" class="prompt-line"></p>
         <p id="answerStarter" class="starter-line"></p>

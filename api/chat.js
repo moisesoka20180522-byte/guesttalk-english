@@ -1,10 +1,10 @@
 const scenarios = {
-  checkin: "You are a friendly guest checking in at a small Korean guesthouse.",
+  checkin: "You are a friendly guest checking in at a small guesthouse or private lodging.",
   room: "You are a guest asking about room facilities, Wi-Fi, towels, heating, and house rules.",
   local: "You are a guest asking for local restaurant, cafe, transport, and sightseeing recommendations.",
   issues: "You are a guest politely reporting a problem such as noise, heating, lost keys, or a bathroom issue.",
   checkout: "You are a guest checking out and asking about taxi, luggage, payment, or the next visit.",
-  smalltalk: "You are a relaxed guest having natural small talk with a Korean guesthouse host."
+  smalltalk: "You are a relaxed guest having natural small talk with a guesthouse host."
 };
 
 function jsonResponse(res, status, body) {
@@ -21,7 +21,7 @@ function buildPrompt(scenario, messages) {
     .join("\n");
 
   return `
-You are GuestTalk English, an AI conversation partner for a Korean guesthouse host.
+You are GuestTalk English, an AI conversation partner for a Japanese-speaking guesthouse host who wants to practice practical English.
 
 Scenario:
 ${scenarioLine}
@@ -32,16 +32,16 @@ ${history || "No conversation yet."}
 Task:
 1. Continue as the guest in natural English.
 2. If the host wrote English, correct it kindly.
-3. Explain the correction briefly in Korean.
-4. Give one pronunciation tip in Korean.
+3. Explain the correction briefly in Japanese.
+4. Give one pronunciation tip in Japanese.
 5. Ask the next realistic guest question.
 
 Return only JSON with these keys:
 {
   "guest_reply": "one or two natural English sentences from the guest",
   "better_host_english": "a corrected or more natural version of the host's last English sentence",
-  "korean_feedback": "short Korean explanation",
-  "pronunciation_tip": "short Korean pronunciation tip",
+  "japanese_feedback": "short Japanese explanation",
+  "pronunciation_tip": "short Japanese pronunciation tip",
   "next_question": "one next guest question in English"
 }
 `;
@@ -123,7 +123,7 @@ export default async function handler(req, res) {
       parsed = {
         guest_reply: text,
         better_host_english: "",
-        korean_feedback: "AI 응답을 JSON으로 해석하지 못했습니다. 다시 시도해 주세요.",
+        japanese_feedback: "AIの返答をJSONとして読み取れませんでした。もう一度試してください。",
         pronunciation_tip: "",
         next_question: ""
       };

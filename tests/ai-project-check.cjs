@@ -23,6 +23,8 @@ const html = read("public/index.html");
 assert(html.includes("aiScenario"), "AI scenario select must be present");
 assert(html.includes("aiMessages"), "AI message history must be present");
 assert(html.includes("manifest.webmanifest"), "PWA manifest must be linked");
+assert(html.includes('lang="ja"'), "HTML language must be Japanese");
+assert(html.includes("AIゲスト"), "Japanese AI guest label must be present");
 
 const app = read("public/app.js");
 assert(app.includes("fetch(\"/api/chat\""), "frontend must call /api/chat");
@@ -32,5 +34,7 @@ const api = read("api/chat.js");
 assert(api.includes("OPENAI_API_KEY"), "API must read OPENAI_API_KEY from env");
 assert(api.includes("https://api.openai.com/v1/responses"), "API must use OpenAI Responses API");
 assert(api.includes("guest_reply"), "API prompt must request guest_reply");
+assert(api.includes("japanese_feedback"), "API prompt must request Japanese feedback");
+assert(!api.includes("korean_feedback"), "API should not request Korean feedback");
 
 console.log("AI project checks passed");
