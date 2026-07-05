@@ -1,13 +1,13 @@
 {
-  "name": "Everyday English AI",
-  "short_name": "English AI",
-  "description": "AIと日常英会話を練習するアプリ",
+  "name": "Everyday English Speak",
+  "short_name": "English Speak",
+  "description": "マイクで話して、自然な英語と発音のコツを練習する会話アプリ",
   "lang": "ja",
-  "start_url": "./index.html",
+  "start_url": "./index.html?v=5",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#f5f7f4",
+  "background_color": "#f3f6f1",
   "theme_color": "#1f7a4d",
   "icons": [
     {
