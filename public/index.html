@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#1f7a4d">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>GuestTalk English AI</title>
+    <link rel="icon" href="icons/app-icon.svg" type="image/svg+xml">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">GuestTalk AI</p>
+          <h1>AI 손님과 상황별 영어회화</h1>
+        </div>
+        <section class="today-card" aria-label="오늘 연습 기록">
+          <span class="today-label">오늘 대화</span>
+          <strong id="practiceCount">0</strong>
+          <span>회</span>
+        </section>
+      </header>
+
+      <section class="ai-panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">AI Roleplay</p>
+            <h2>상황별 손님 역할 대화</h2>
+          </div>
+          <select id="aiScenario" aria-label="AI 회화 상황">
+            <option value="checkin">체크인</option>
+            <option value="room">객실 안내</option>
+            <option value="local">동네 추천</option>
+            <option value="issues">문제 대응</option>
+            <option value="checkout">체크아웃</option>
+            <option value="smalltalk">스몰토크</option>
+          </select>
+        </div>
+
+        <div id="aiMessages" class="ai-messages" aria-live="polite"></div>
+
+        <form id="aiForm" class="ai-form">
+          <textarea id="aiInput" rows="3" placeholder="영어로 답해보세요. 예: Welcome! May I check your reservation name?"></textarea>
+          <button class="primary-button" type="submit">AI 손님에게 말하기</button>
+        </form>
+      </section>
+
+      <section class="mission-strip" aria-label="오늘의 연습 미션">
+        <article>
+          <span>1</span>
+          <p>AI 손님 질문에 영어로 답하기</p>
+        </article>
+        <article>
+          <span>2</span>
+          <p>수정 문장 따라 말하기</p>
+        </article>
+        <article>
+          <span>3</span>
+          <p>다음 질문까지 대화 이어가기</p>
+        </article>
+      </section>
+
+      <section class="phrase-panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Quick Phrases</p>
+            <h2>바로 쓰는 민박 영어</h2>
+          </div>
+          <button id="newPrompt" class="icon-button" type="button" aria-label="새 표현">+</button>
+        </div>
+        <p id="talkPrompt" class="prompt-line"></p>
+        <p id="answerStarter" class="starter-line"></p>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./service-worker.js");
+        });
+      }
+    </script>
+  </body>
+</html>

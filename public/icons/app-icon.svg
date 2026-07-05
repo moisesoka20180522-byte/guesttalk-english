@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192" role="img" aria-label="GuestTalk AI">
+  <rect width="192" height="192" rx="42" fill="#1f7a4d"/>
+  <path d="M42 72c0-15 12-27 27-27h54c15 0 27 12 27 27v31c0 15-12 27-27 27H93l-32 22v-24c-11-4-19-14-19-25V72Z" fill="#ffffff"/>
+  <path d="M68 82h56M68 101h42" stroke="#1f7a4d" stroke-width="12" stroke-linecap="round"/>
+  <circle cx="132" cy="120" r="18" fill="#f1b24a"/>
+</svg>

@@ -1,0 +1,36 @@
+const fs = require("fs");
+const path = require("path");
+
+const root = path.resolve(__dirname, "..");
+
+function read(relativePath) {
+  return fs.readFileSync(path.join(root, relativePath), "utf8");
+}
+
+function assert(condition, message) {
+  if (!condition) throw new Error(message);
+}
+
+assert(fs.existsSync(path.join(root, "api", "chat.js")), "api/chat.js must exist");
+assert(fs.existsSync(path.join(root, "public", "index.html")), "public/index.html must exist");
+assert(fs.existsSync(path.join(root, "public", "app.js")), "public/app.js must exist");
+assert(fs.existsSync(path.join(root, "public", "manifest.webmanifest")), "public/manifest.webmanifest must exist");
+
+const pkg = JSON.parse(read("package.json"));
+assert(pkg.scripts && pkg.scripts.start, "package.json must define start script");
+
+const html = read("public/index.html");
+assert(html.includes("aiScenario"), "AI scenario select must be present");
+assert(html.includes("aiMessages"), "AI message history must be present");
+assert(html.includes("manifest.webmanifest"), "PWA manifest must be linked");
+
+const app = read("public/app.js");
+assert(app.includes("fetch(\"/api/chat\""), "frontend must call /api/chat");
+assert(app.includes("sendAiMessage"), "frontend must define sendAiMessage");
+
+const api = read("api/chat.js");
+assert(api.includes("OPENAI_API_KEY"), "API must read OPENAI_API_KEY from env");
+assert(api.includes("https://api.openai.com/v1/responses"), "API must use OpenAI Responses API");
+assert(api.includes("guest_reply"), "API prompt must request guest_reply");
+
+console.log("AI project checks passed");
