@@ -19,7 +19,9 @@ const state = {
   isConversationActive: false,
   isListening: false,
   recognition: null,
-  languageIndex: 0
+  languageIndex: 0,
+  listenTimer: null,
+  speechTimer: null
 };
 
 const recognitionLangs = ["ko-KR", "ja-JP", "en-US"];
@@ -62,6 +64,12 @@ function addMessage(role, html) {
 
 function updateStatus(text) {
   els.voiceStatus.textContent = text;
+}
+
+function scheduleListening(delay = 700) {
+  clearTimeout(state.listenTimer);
+  if (!state.isConversationActive || state.isSending) return;
+  state.listenTimer = setTimeout(startListening, delay);
 }
 
 function showWelcome() {
@@ -221,12 +229,19 @@ function setupSpeechRecognition() {
 
   state.recognition.addEventListener("end", () => {
     state.isListening = false;
+    if (state.isConversationActive && !state.isSending) {
+      updateStatus("Listening restarted. Please speak again.");
+      scheduleListening(500);
+    }
   });
 
-  state.recognition.addEventListener("error", () => {
+  state.recognition.addEventListener("error", (event) => {
     state.isListening = false;
-    updateStatus("音声を聞き取れませんでした。もう一度話してください。");
-    if (state.isConversationActive && !state.isSending) setTimeout(startListening, 700);
+    const message = event.error === "not-allowed"
+      ? "マイクが許可されていません。ブラウザのマイク許可を確認してください。"
+      : "音声を聞き取れませんでした。もう一度話してください。";
+    updateStatus(message);
+    if (event.error !== "not-allowed") scheduleListening(900);
   });
 }
 
@@ -238,7 +253,7 @@ function startListening() {
   try {
     state.recognition.start();
   } catch {
-    setTimeout(startListening, 700);
+    scheduleListening(900);
   }
 }
 
@@ -251,6 +266,8 @@ function startConversation() {
 
 function stopConversation() {
   state.isConversationActive = false;
+  clearTimeout(state.listenTimer);
+  clearTimeout(state.speechTimer);
   if (state.recognition && state.isListening) state.recognition.stop();
   window.speechSynthesis?.cancel();
   updateVoiceButton();
@@ -272,12 +289,19 @@ function speakText(text) {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "en-US";
     utterance.rate = els.levelSelect.value === "beginner" ? 0.82 : els.levelSelect.value === "intermediate" ? 0.92 : 1;
-    utterance.onstart = () => updateStatus("AI is speaking...");
-    utterance.onend = () => {
+    let finished = false;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      clearTimeout(state.speechTimer);
       updateStatus("Your turn. Speak naturally.");
       resolve();
     };
-    utterance.onerror = () => resolve();
+    utterance.onstart = () => updateStatus("AI is speaking...");
+    utterance.onend = finish;
+    utterance.onerror = finish;
+    const fallbackMs = Math.min(12000, Math.max(3500, text.length * 85));
+    state.speechTimer = setTimeout(finish, fallbackMs);
     window.speechSynthesis.speak(utterance);
   });
 }

@@ -24,13 +24,15 @@ assert(!html.includes("inputLanguage"), "manual input language selector should b
 assert(!html.includes("conversationMode"), "manual conversation mode selector should be removed");
 assert(html.includes("levelSelect"), "level selector must remain");
 assert(html.includes("topicSelect"), "topic selector must remain");
-assert(html.includes("v=7"), "cache-busting version must be updated");
+assert(html.includes("v=8"), "cache-busting version must be updated");
 assert(html.includes('lang="ja"'), "HTML language must be Japanese");
 
 const app = read("app.js");
 assert(app.includes('fetch("/api/chat"'), "frontend must call /api/chat");
 assert(app.includes("toggleConversation"), "frontend must support live conversation toggle");
 assert(app.includes("startListening"), "frontend must restart listening after AI voice reply");
+assert(app.includes("scheduleListening"), "frontend must restart listening after silent speech recognition end");
+assert(app.includes("speechTimer"), "frontend must recover if speech synthesis end event is missed");
 assert(app.includes("SpeechRecognition"), "frontend must support speech recognition");
 assert(app.includes("speechSynthesis"), "frontend must support AI speech playback");
 assert(app.includes("ko-KR"), "frontend must try Korean recognition");
