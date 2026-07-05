@@ -3,6 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "check": "node tests/ai-project-check.cjs && node --check api/chat.js && node --check public/app.js"
+    "check": "node tests/ai-project-check.cjs && node --check api/chat.js && node --check app.js"
   }
 }

@@ -12,21 +12,21 @@ function assert(condition, message) {
 }
 
 assert(fs.existsSync(path.join(root, "api", "chat.js")), "api/chat.js must exist");
-assert(fs.existsSync(path.join(root, "public", "index.html")), "public/index.html must exist");
-assert(fs.existsSync(path.join(root, "public", "app.js")), "public/app.js must exist");
-assert(fs.existsSync(path.join(root, "public", "manifest.webmanifest")), "public/manifest.webmanifest must exist");
+assert(fs.existsSync(path.join(root, "index.html")), "index.html must exist at project root");
+assert(fs.existsSync(path.join(root, "app.js")), "app.js must exist at project root");
+assert(fs.existsSync(path.join(root, "manifest.webmanifest")), "manifest.webmanifest must exist at project root");
 
 const pkg = JSON.parse(read("package.json"));
 assert(pkg.scripts && pkg.scripts.check, "package.json must define check script");
 
-const html = read("public/index.html");
+const html = read("index.html");
 assert(html.includes("aiScenario"), "AI scenario select must be present");
 assert(html.includes("aiMessages"), "AI message history must be present");
 assert(html.includes("manifest.webmanifest"), "PWA manifest must be linked");
 assert(html.includes('lang="ja"'), "HTML language must be Japanese");
 assert(html.includes("AIゲスト"), "Japanese AI guest label must be present");
 
-const app = read("public/app.js");
+const app = read("app.js");
 assert(app.includes("fetch(\"/api/chat\""), "frontend must call /api/chat");
 assert(app.includes("sendAiMessage"), "frontend must define sendAiMessage");
 

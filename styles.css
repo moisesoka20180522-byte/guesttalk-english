@@ -7,8 +7,6 @@
   --line: #dce3dd;
   --green: #1f7a4d;
   --green-dark: #145c39;
-  --blue: #245f9c;
-  --amber: #b66b19;
   --shadow: 0 18px 44px rgba(30, 46, 36, 0.1);
 }
 
@@ -21,7 +19,7 @@ body {
   min-height: 100vh;
   background: var(--bg);
   color: var(--ink);
-  font-family: Arial, "Noto Sans KR", sans-serif;
+  font-family: Arial, "Noto Sans JP", sans-serif;
   -webkit-tap-highlight-color: transparent;
 }
 
